@@ -14,7 +14,7 @@
 - [Who Is This For?](#-who-is-this-for)
 - [Prerequisites](#-prerequisites)
 - [Curriculum Overview](#-curriculum-overview)
-  - [Lesson 0 — LLM Foundations & Mental Models](#lesson-0--llm-foundations--mental-models)
+  - [Lesson 0 — Language Model Landscape & Mental Models](#lesson-0--language-model-landscape--mental-models)
   - [Lesson 1 — The AI-Development Life Cycle](#lesson-1--the-ai-development-life-cycle)
   - [Lesson 2 — Advanced Prompting, Structured Outputs & Generative UI](#lesson-2--advanced-prompting-structured-outputs--generative-ui)
   - [Lesson 3 — Custom Tool Development & MCP](#lesson-3--custom-tool-development--mcp)
@@ -76,7 +76,7 @@ The guide is structured into **10 Lessons (0–9)**, each building on the last.
  
 | # | Lesson | Core Theme |
 |---|---|---|
-| 0 | LLM Foundations & Mental Models | How LLMs actually work as engineering components |
+| 0 | Language Model Landscape & Mental Models | How language models work as engineering components — LLMs, SLMs, and OSS |
 | 1 | The AI-Development Life Cycle | Translating SDLC discipline into AI systems |
 | 2 | Advanced Prompting, Structured Outputs & Generative UI | Making LLMs speak in schemas and drive UIs |
 | 3 | Custom Tool Development & MCP | Building the tools your agents use to act on the world |
@@ -89,18 +89,22 @@ The guide is structured into **10 Lessons (0–9)**, each building on the last.
  
 ---
 
-### Lesson 0 — LLM Foundations & Mental Models
-> *Before you build with LLMs, you need to understand them as engineering components — not magic boxes.*
+### Lesson 0 — Language Model Landscape & Mental Models
+> *Before you build with language models, you need to understand the full spectrum — from frontier LLMs to locally-run SLMs — as engineering components, not magic boxes.*
  
 | Topic | Description |
 |---|---|
-| **0.1 How LLMs Work (Engineer's View)** | Tokenization and vocabulary; context windows and why they're a hard constraint; temperature, top-p, and how sampling affects output variance |
-| **0.2 Model Selection Criteria** | Capability vs. cost vs. latency tradeoffs; frontier vs. mid-tier vs. small models; when to use instruct models vs. base models |
-| **0.3 Function Calling & Tool Use Fundamentals** | How models decide to invoke a tool; the request/response cycle for tool calls; structured schema design for tool definitions |
-| **0.4 Prompt Anatomy** | System prompts, user turns, assistant turns, and how the conversation object is constructed; few-shot examples and their effect on output behavior |
-| **0.5 Vendor Landscape & API Patterns** | Comparing OpenAI, Anthropic, Google, and OSS model APIs; designing a vendor-agnostic abstraction layer from day one |
+| **0.1 The Model Spectrum** | LLMs vs. SLMs — capability, cost, latency, and privacy tradeoffs; when a 7B local model is the right call over a frontier API; the open-source vs. proprietary decision framework |
+| **0.2 Open-Source Model Families** | Llama (Meta), Mistral/Mixtral, Phi (Microsoft), Gemma (Google), Qwen (Alibaba), DeepSeek — their respective strengths, licensing, and intended use cases |
+| **0.3 How Language Models Work (Engineer's View)** | Tokenization and vocabulary; context windows and why they're a hard constraint; temperature, top-p, and how sampling affects output variance; understanding model benchmarks and what they actually measure |
+| **0.4 Quantization & Model Formats** | What quantization means in practice — GGUF, GPTQ, AWQ, and ONNX formats; the quality/performance tradeoff at different bit depths (2-bit through 16-bit); choosing the right quantization level for your hardware |
+| **0.5 Local Inference Runtimes** | Ollama (developer-friendly local inference); llama.cpp (CPU/GPU cross-platform); vLLM (high-throughput GPU serving); HuggingFace Transformers and TGI (Text Generation Inference) — when to use each |
+| **0.6 Function Calling & Tool Use Fundamentals** | How models decide to invoke a tool; the request/response cycle for tool calls; which OSS models support native function calling and which require workarounds |
+| **0.7 Prompt Anatomy** | System prompts, user turns, assistant turns, and how the conversation object is constructed; prompt format differences across model families (ChatML, Alpaca, Llama-3 format, Mistral instruct format) |
+| **0.8 Model Selection Framework** | A practical decision tree: capability requirements → privacy/data residency constraints → latency SLA → cost budget → OSS vs. proprietary → specific model recommendation |
+| **0.9 Vendor Landscape & API Abstraction** | Comparing OpenAI, Anthropic, Google, Mistral AI, Groq, Together AI, and self-hosted OSS APIs; designing a vendor-agnostic abstraction layer from day one using LiteLLM or equivalent |
  
-**Key Outcome:** You'll have a precise mental model of what happens between "send request" and "receive response" — which is the foundation every subsequent lesson builds on.
+**Key Outcome:** You'll have a precise, model-agnostic mental model of the full language model landscape — and a decision framework for choosing the right model (proprietary or OSS, cloud or local) for any given component in your system.
  
 ---
 
@@ -120,32 +124,36 @@ The guide is structured into **10 Lessons (0–9)**, each building on the last.
 ---
  
 ### Lesson 2 — Advanced Prompting, Structured Outputs & Generative UI
-> *Moving beyond text blobs: forcing models to speak in schemas and drive your frontend components.*
+> *Moving beyond text blobs: forcing models to speak in schemas and drive your frontend components — across proprietary and open-source models alike.*
  
 | Topic | Description |
 |---|---|
-| **2.1 Production-Grade Prompt Engineering** | Chain-of-thought and reasoning elicitation; meta-prompting; prompt chaining vs. single-shot design; avoiding prompt brittleness |
-| **2.2 Structured Output Engineering** | Forcing JSON/XML compliance via Pydantic schemas and instructor patterns; native JSON mode; handling partial/malformed outputs gracefully |
-| **2.3 Streaming & Partial JSON Parsing** | Streaming tokens for high-speed UI rendering; incremental JSON parsers; managing streaming error states |
-| **2.4 Generative UI & Component-Driven Layouts** | Architecting a Generative UI state machine — how an LLM selects a specific frontend component (data table, calendar, invoice layout) based on intent; streaming tokens directly into React/Angular to update UI in real-time |
+| **2.1 Production-Grade Prompt Engineering** | Chain-of-thought and reasoning elicitation; meta-prompting; prompt chaining vs. single-shot design; avoiding prompt brittleness across model updates |
+| **2.2 Prompt Format Differences Across Model Families** | How prompting strategies differ between GPT, Claude, Llama 3, Mistral, and Phi; adapting system prompt design to each family's instruct format and behavioral tendencies |
+| **2.3 Structured Output Engineering** | Forcing JSON/XML compliance via Pydantic schemas and instructor patterns; native JSON mode (where supported); handling partial/malformed outputs gracefully; grammar-constrained decoding for OSS models (llama.cpp grammar, Outlines, LMQL) |
+| **2.4 Structured Outputs for Models Without Native JSON Mode** | Prompting strategies and post-processing pipelines for OSS models that lack native structured output support; constrained generation techniques as a substitute |
+| **2.5 Streaming & Partial JSON Parsing** | Streaming tokens for high-speed UI rendering; incremental JSON parsers; managing streaming error states across cloud and self-hosted endpoints |
+| **2.6 Generative UI & Component-Driven Layouts** | Architecting a Generative UI state machine — how a model selects a specific frontend component (data table, calendar, invoice layout) based on intent; streaming tokens directly into React/Angular to update UI in real-time |
  
-**Key Outcome:** You'll build systems where the LLM doesn't just return text — it selects, populates, and drives your frontend components based on user intent.
+**Key Outcome:** You'll build systems where the model doesn't just return text — it selects, populates, and drives your frontend components based on user intent, with strategies that work across both proprietary and open-source backends.
  
 ---
  
 ### Lesson 3 — Custom Tool Development & MCP
-> *Agents are only as capable as the tools you build for them. This lesson teaches you to build them right.*
+> *Agents are only as capable as the tools you build for them. This lesson teaches you to build them right — and adapt them for any model backend.*
  
 | Topic | Description |
 |---|---|
 | **3.1 Tool Design Fundamentals** | Anatomy of a well-designed tool: naming, description quality, input/output schema design; why tool descriptions are as important as tool logic |
 | **3.2 Building Tools in Python** | Writing tool functions from scratch; type annotations and Pydantic validation; async tool execution; error handling and graceful failure responses |
-| **3.3 Tool Categories & Patterns** | Read vs. write tools; deterministic vs. side-effectful tools; composite tools (tools that call other tools); tool chaining patterns |
-| **3.4 The Model Context Protocol (MCP)** | Why MCP exists: moving beyond loose API wrappers; MCP server architecture; decoupling the LLM client from execution contexts (databases, filesystems, microservices) |
-| **3.5 Building Modular MCP Servers** | Structuring MCP servers for reusability; exposing tools, resources, and prompts via MCP; versioning and maintaining MCP servers across agent deployments |
-| **3.6 Tool Observability & Testing** | Unit testing individual tools in isolation; logging tool inputs and outputs; tracing tool calls within agent execution; validating tool behavior before connecting them to agents |
+| **3.3 Tool Categories & Patterns** | Read vs. write tools; deterministic vs. side-effectful tools; composite tools; tool chaining patterns |
+| **3.4 Native Function Calling vs. Prompted Tool Use** | Models with native function calling support (GPT-4, Claude, Gemini, some OSS models); workaround patterns for OSS models without native support — ReAct-style XML/JSON prompting, parser-based tool extraction |
+| **3.5 Tool Adaptation Across Model Families** | Designing tools that work portably across model backends; schema compatibility differences; testing tool behavior against multiple models in your CI pipeline |
+| **3.6 The Model Context Protocol (MCP)** | Why MCP exists: moving beyond loose API wrappers; MCP server architecture; decoupling the model client from execution contexts (databases, filesystems, microservices) |
+| **3.7 Building Modular MCP Servers** | Structuring MCP servers for reusability; exposing tools, resources, and prompts via MCP; versioning and maintaining MCP servers across agent deployments and model backends |
+| **3.8 Tool Observability & Testing** | Unit testing individual tools in isolation; logging tool inputs and outputs; tracing tool calls within agent execution; validating tool behavior before connecting them to agents |
  
-**Key Outcome:** You'll be able to design, build, test, and expose custom tools that give your agents the ability to act on the real world safely and reliably.
+**Key Outcome:** You'll be able to design, build, test, and expose custom tools that give your agents the ability to act on the real world — with strategies that port across proprietary APIs and open-source model backends.
  
 ---
  
@@ -170,12 +178,13 @@ The guide is structured into **10 Lessons (0–9)**, each building on the last.
 | Topic | Description |
 |---|---|
 | **5.1 The AI Testing Pyramid** | Unit tests for individual tools and prompt outputs; integration tests for agent chains and tool sequences; end-to-end tests for full multi-agent workflows; mapping this pyramid to CI/CD gates |
-| **5.2 Automated Evaluation (LLM-as-a-Judge)** | Establishing evaluation harnesses: Faithfulness, Answer Relevance, Context Recall, Semantic Similarity; building automated regression suites that evaluate prompt changes before hitting production |
-| **5.3 Golden Dataset Construction** | Curating representative test cases; handling distribution shift in evaluation sets; managing dataset versioning alongside prompt versions |
-| **5.4 Adversarial AI & Red-Teaming** | Prompt injection attacks — direct jailbreaking and indirect injection via malicious user inputs or emails; system-identity disclosure testing; adversarial input fuzzing |
-| **5.5 Runtime Guardrails** | Synchronous input/output validation layers (Llama Guard, NeMo Guardrails); PII detection and filtering; toxicity and out-of-scope intent blocking before reaching core execution |
+| **5.2 Cross-Model Evaluation** | Running the same evaluation harness across proprietary and OSS model backends; detecting capability gaps and behavioral differences between models serving the same role in your system |
+| **5.3 Automated Evaluation (LLM-as-a-Judge)** | Establishing evaluation harnesses: Faithfulness, Answer Relevance, Context Recall, Semantic Similarity; using OSS judge models (Llama, Mistral) as cost-effective alternatives to proprietary judges |
+| **5.4 Golden Dataset Construction** | Curating representative test cases; handling distribution shift in evaluation sets; managing dataset versioning alongside prompt versions |
+| **5.5 Adversarial AI & Red-Teaming** | Prompt injection attacks — direct jailbreaking and indirect injection via malicious inputs; OSS model-specific attack surfaces (no vendor-managed safety layers); system-identity disclosure testing; adversarial input fuzzing |
+| **5.6 Runtime Guardrails** | Synchronous input/output validation layers (Llama Guard, NeMo Guardrails, ShieldGemma); self-hosted guardrail models for air-gapped environments; PII detection, toxicity filtering, and out-of-scope intent blocking |
  
-**Key Outcome:** You'll red-team your own systems, build automated evaluation pipelines, and ship with layered defenses that protect users and infrastructure.
+**Key Outcome:** You'll red-team your own systems across both proprietary and open-source model backends, build automated evaluation pipelines, and ship with layered defenses that protect users and infrastructure.
  
 ---
  
@@ -185,21 +194,23 @@ The guide is structured into **10 Lessons (0–9)**, each building on the last.
 | Topic | Description |
 |---|---|
 | **6.1 Autonomous Agency (The ReAct Loop)** | The Thought-Action-Observation reasoning loop; forcing models to reason before executing side effects; detecting and resolving recursive state divergence |
-| **6.2 Agent Complexity & Design Methodology** | Single-agent sufficiency testing — proving you need multiple agents before building them; monolithic vs. distributed agent design tradeoffs; critical path analysis for agent graphs; complexity scoring for agent topologies |
-| **6.3 Agent Performance Engineering** | Full coverage across five dimensions — see breakdown below |
-| **6.4 State Management & Handoff Topologies** | Managing graphs and DAGs; conditional routing and parallel execution; Supervisor Pattern (central orchestrator + specialized sub-agents); Choreography/Sequential Pattern (linear domain-specific handoffs); Peer-to-Peer Networks (decentralized task execution with boundary conditions) |
+| **6.2 ReAct Patterns for OSS Models** | Adapting ReAct loops for models without native tool use; XML/JSON-prompted reasoning chains; parser reliability strategies for OSS model outputs |
+| **6.3 Agent Complexity & Design Methodology** | Single-agent sufficiency testing — proving you need multiple agents before building them; monolithic vs. distributed agent design tradeoffs; critical path analysis for agent graphs; agent complexity scoring |
+| **6.4 Agent Performance Engineering** | Full coverage across five dimensions — see breakdown below |
+| **6.5 State Management & Handoff Topologies** | Managing graphs and DAGs; conditional routing and parallel execution; Supervisor Pattern; Choreography/Sequential Pattern; Peer-to-Peer Networks |
  
-#### 6.3 Agent Performance Engineering — Full Breakdown
+#### 6.4 Agent Performance Engineering — Full Breakdown
  
 **Latency Optimization**
  
 | Method | Description |
 |---|---|
 | **Latency Budgeting** | Designing top-down from an acceptable SLA — allocating time budgets per hop before writing code |
-| **Model Tiering** | Routing simpler hops to faster/cheaper models (Haiku, GPT-4o-mini) and reserving frontier models for high-reasoning steps only |
+| **Model Tiering with SLMs** | Routing simpler hops to fast local SLMs (Phi-3-mini, Llama 3.2 3B, Gemma 2B via Ollama) and reserving frontier models for high-reasoning steps; local SLMs eliminate API round-trip latency entirely for lightweight hops |
+| **Local SLM Routing for Latency-Critical Paths** | Running SLMs on-device or on-premise for hops where sub-100ms inference matters; designing hybrid cloud/local routing at the agent topology level |
 | **Speculative Execution** | Running multiple likely next-step paths simultaneously; discarding losers when the winning path resolves |
 | **Streaming & Progressive Rendering** | Returning partial agent outputs as they arrive to minimize perceived latency even when wall-clock time is unchanged |
-| **Prompt Compression & Context Pruning** | Reducing the token payload passed between hops; inference time scales with context size |
+| **Prompt Compression & Context Pruning** | Reducing the token payload passed between hops; inference time scales with context size for both cloud and self-hosted models |
  
 **Throughput & Concurrency**
  
@@ -207,93 +218,115 @@ The guide is structured into **10 Lessons (0–9)**, each building on the last.
 |---|---|
 | **Parallelization Patterns** | Fan-out/fan-in (scatter tasks, collect results); map-reduce for agents; identifying which topologies structurally block parallelism |
 | **Priority Queue Scheduling** | Critical-path tasks pre-empting background enrichment tasks under concurrent load |
-| **Rate Limit Cascade Management** | Token budget tracking *across* agents, not just within one; preventing a single provider rate limit from silently stalling an entire chain |
+| **Rate Limit Cascade Management** | Token budget tracking across agents; preventing a single provider rate limit from stalling an entire chain; self-hosted SLMs as rate-limit-free fallback capacity |
 | **Horizontal Agent Pool Scaling** | Stateless agent workers that scale independently of the orchestration layer |
-| **Batch-Aware Agent Design** | When agent-per-document is the wrong topology; designing for bulk workflows at scale |
+| **Batch-Aware Agent Design** | When agent-per-document is the wrong topology; designing for bulk workflows at scale; OSS model batch inference APIs for high-throughput offline processing |
  
 **Resilience & Fault Tolerance**
  
 | Method | Description |
 |---|---|
 | **Circuit Breaker Pattern** | Preventing a failing downstream tool or model from cascading failure across the full agent graph |
+| **Model Fallback Routing** | Automatically routing to a self-hosted OSS model when a cloud provider API is unavailable or rate-limited; designing fallback chains across model tiers |
 | **Idempotency Design** | Ensuring agent actions can be safely retried without duplicate side effects — critical for DB writes, payments, and emails |
 | **Timeout & Graceful Degradation** | Designing explicit fallback behavior when an agent hop exceeds its latency budget — partial result, simpler path, or human escalation |
-| **Retry Policies with Exponential Backoff** | Especially important when agents are hitting external APIs under load |
+| **Retry Policies with Exponential Backoff** | Especially important when agents are hitting external APIs or overloaded self-hosted inference endpoints |
  
 **Observability-Driven Optimization**
  
 | Method | Description |
 |---|---|
-| **Distributed Tracing Across Hops** | Tagging every LLM call with trace IDs to reconstruct full execution graphs in LangSmith or Langfuse |
-| **Cost-Per-Hop Analysis** | Attributing token spend to individual agents; identifying which node is responsible for the majority of LLM cost |
-| **Performance Regression Detection** | Catching latency increases introduced by prompt or topology changes before they reach users |
+| **Distributed Tracing Across Hops** | Tagging every model call with trace IDs to reconstruct full execution graphs in LangSmith or Langfuse — across cloud and self-hosted model backends equally |
+| **Cost-Per-Hop Analysis** | Attributing token spend and inference time to individual agents; comparing cloud API cost vs. self-hosted SLM infrastructure cost per hop |
+| **Performance Regression Detection** | Catching latency increases introduced by prompt, topology, or model version changes before they reach users |
  
-**Key Outcome:** You'll design multi-agent systems with principled complexity decisions, quantified latency budgets, parallelization strategies, and resilience patterns that hold under production load.
+**Key Outcome:** You'll design multi-agent systems with principled complexity decisions, quantified latency budgets, SLM-aware tiering strategies, parallelization patterns, and resilience that hold under production load.
  
 ---
  
 ### Lesson 7 — AI Governance & Responsible AI
-> *Governance is not a checklist you complete at the end — it's a design discipline you apply from the start.*
+> *Governance is not a checklist you complete at the end — it's a design discipline you apply from the start. OSS models require extra diligence because vendor-managed safety layers don't exist.*
  
 | Topic | Description |
 |---|---|
 | **7.1 Foundations of AI Governance** | What governance means in practice for engineering teams; the difference between compliance, ethics, and responsible design; regulatory landscape overview (EU AI Act, emerging frameworks) |
-| **7.2 Bias, Fairness & Harm Auditing** | Identifying sources of bias in training data, prompts, and retrieval pipelines; fairness evaluation methodologies; documenting known limitations honestly |
-| **7.3 Transparency & Model Cards** | Writing model cards and system cards for your AI systems; transparency reporting for internal and external stakeholders; communicating AI limitations to end users |
-| **7.4 Governance in the ADLC** | Embedding compliance checkpoints into every phase of the AI development lifecycle; audit trails for prompt changes, model versions, and data access; approval gates for high-risk capabilities |
-| **7.5 Human-in-the-Loop as Governance** | Designing HITL not just as a UX feature but as a governance mechanism; escalation frameworks for uncertain or high-stakes outputs |
-| **7.6 AI Incident Response** | What happens when your AI system causes harm or behaves unexpectedly; incident classification; rollback procedures; post-incident review frameworks |
+| **7.2 Governance for OSS Models** | No vendor-managed safety filters — what that means for engineering responsibility; model provenance auditing (verifying weights haven't been tampered with); community-maintained vs. organization-maintained models; liability considerations for OSS model behavior |
+| **7.3 Bias, Fairness & Harm Auditing** | Identifying sources of bias in training data, prompts, and retrieval pipelines; fairness evaluation methodologies; OSS model bias characteristics and community audit resources; documenting known limitations honestly |
+| **7.4 Transparency & Model Cards** | Writing model cards and system cards for your AI systems; transparency reporting for internal and external stakeholders; communicating AI limitations — including model-specific limitations — to end users |
+| **7.5 Governance in the ADLC** | Embedding compliance checkpoints into every phase of the AI development lifecycle; audit trails for prompt changes, model versions (including OSS releases), and data access; approval gates for high-risk capabilities |
+| **7.6 Human-in-the-Loop as Governance** | Designing HITL not just as a UX feature but as a governance mechanism; escalation frameworks for uncertain or high-stakes outputs regardless of the underlying model |
+| **7.7 AI Incident Response** | What happens when your AI system causes harm or behaves unexpectedly; incident classification; rollback procedures; post-incident review frameworks; specific considerations when the incident involves an OSS model |
  
-**Key Outcome:** You'll be able to embed governance into your systems by design — with audit trails, fairness evaluations, transparency artifacts, and incident response plans that satisfy both engineering and compliance stakeholders.
+**Key Outcome:** You'll embed governance into your systems by design — with audit trails, fairness evaluations, OSS-specific risk management, transparency artifacts, and incident response plans that satisfy both engineering and compliance stakeholders.
  
 ---
  
 ### Lesson 8 — Enterprise-Ready AI
-> *The gap between a working AI prototype and a system that functions inside a real organization is enormous. This lesson closes it.*
+> *The gap between a working AI prototype and a system that functions inside a real organization is enormous. OSS models close some gaps and open others. This lesson covers both.*
  
 | Topic | Description |
 |---|---|
 | **8.1 Enterprise Architecture Patterns for AI** | Where AI fits in existing enterprise architecture; integrating with legacy systems, internal APIs, and data warehouses; authentication and authorization for AI systems |
 | **8.2 Working with Agents Inside an Enterprise** | Defining agent scope and boundaries within organizational workflows; who owns an agent's decisions; change management for teams adopting agentic workflows |
-| **8.3 Multi-Tenant AI Systems** | Data isolation between tenants; per-tenant prompt customization and memory partitioning; billing and usage tracking at tenant level |
-| **8.4 Enterprise Security Posture** | Data residency and sovereignty requirements; on-premise vs. cloud-hosted model tradeoffs; network isolation for sensitive AI workloads; vendor security assessment |
-| **8.5 Throughput at Enterprise Scale** | Designing for hundreds of concurrent agent sessions; SLA design for enterprise clients; cost predictability and budgeting at organizational scale |
-| **8.6 Procurement, Vendor Management & Model Risk** | Evaluating LLM vendors for enterprise use; model risk frameworks; SLA negotiation with AI providers; contingency planning for model deprecation or provider outages |
-| **8.7 Stakeholder Communication & AI Literacy** | Communicating AI system capabilities and limitations to non-technical stakeholders; managing expectations around AI reliability; building internal AI literacy programs |
+| **8.3 On-Premise SLM Deployment** | Running SLMs on enterprise-owned infrastructure for data sovereignty; hardware planning for SLM inference (GPU vs. CPU, VRAM requirements per model size and quantization); deployment patterns for air-gapped environments with zero external model API calls |
+| **8.4 Hybrid Cloud/Local Routing Architectures** | Routing general tasks to cloud LLMs and sensitive data through on-premise SLMs; designing the routing decision layer; enforcing data classification policies at the model dispatch layer |
+| **8.5 Multi-Tenant AI Systems** | Data isolation between tenants; per-tenant prompt customization and memory partitioning; billing and usage tracking at tenant level across cloud and self-hosted model endpoints |
+| **8.6 Enterprise Security Posture** | Data residency and sovereignty requirements; network isolation for sensitive AI workloads; on-premise SLMs as a solution to third-party data exposure risk; vendor security assessment for cloud providers |
+| **8.7 Throughput at Enterprise Scale** | Designing for hundreds of concurrent agent sessions; SLA design for enterprise clients; cost predictability across cloud API spend and self-hosted infrastructure; capacity planning for SLM inference pools |
+| **8.8 Procurement, Vendor Management & Model Risk** | Evaluating LLM vendors for enterprise use; OSS model governance and long-term maintainability risk; model risk frameworks; SLA negotiation with AI providers; contingency planning for model deprecation |
+| **8.9 Stakeholder Communication & AI Literacy** | Communicating AI system capabilities and limitations — including model-specific limitations — to non-technical stakeholders; managing expectations around AI reliability; building internal AI literacy programs |
  
-**Key Outcome:** You'll be equipped to deploy AI systems that function inside real organizational constraints — with the security posture, scalability, governance integration, and stakeholder management that enterprise environments demand.
+**Key Outcome:** You'll deploy AI systems that function inside real organizational constraints — with the security posture, scalability, on-premise OSS model integration, governance, and stakeholder management that enterprise environments demand.
  
 ---
  
 ### Lesson 9 — Cloud Infrastructure, Observability & Scalable Deployment
-> *The last mile: making your AI systems fast, cheap, observable, and safe to operate at scale.*
+> *The last mile: making your AI systems fast, cheap, observable, and safe to operate at scale — whether they're calling cloud APIs or running models on your own hardware.*
  
 | Topic | Description |
 |---|---|
-| **9.1 Performance & Cost Optimization** | Semantic caching for previously answered queries; token rate-limit strategies; batch processing optimization; backup and fallback model routing |
-| **9.2 Cloud-Native Architecture** | Containerizing stateful agent systems (Docker, Kubernetes); event-driven serverless deployment (AWS Lambda, Cloud Run); maintaining state across stateless computing environments |
-| **9.3 Observability Stack for AI Systems** | Distributed tracing with LangSmith and Langfuse; structured logging for LLM calls; latency dashboards and cost monitoring; alerting on prompt regression and error rate spikes |
-| **9.4 Concurrent Agent Pool Management** | Horizontal scaling of agent workers; queue management for high-throughput workflows; load balancing across model providers |
-| **9.5 CI/CD for AI Systems** | Automated eval pipelines triggered on prompt changes; canary deployments for new model versions; rollback automation on eval regression |
-| **9.6 Human-in-the-Loop (HITL) Gateways** | Injecting human approval checkpoints for high-stakes actions (DB writes, payments, outbound emails) without breaking agentic continuity; async approval queue design |
+| **9.1 Performance & Cost Optimization** | Semantic caching for previously answered queries; token rate-limit strategies; batch processing optimization; backup and fallback model routing between cloud and self-hosted endpoints |
+| **9.2 Self-Hosting Language Models** | GPU/CPU infrastructure planning for SLM inference; serving frameworks — vLLM for high-throughput GPU inference, Ollama for developer environments, HuggingFace TGI for production OSS serving; model loading, warm-up, and memory management; benchmarking self-hosted vs. API-hosted model performance |
+| **9.3 Quantization for Deployment** | Applying quantization to reduce model memory footprint for deployment; GGUF with llama.cpp for CPU inference; GPTQ/AWQ for GPU-accelerated serving; quality regression testing after quantization |
+| **9.4 Cloud-Native Architecture** | Containerizing stateful agent systems (Docker, Kubernetes); event-driven serverless deployment (AWS Lambda, Cloud Run); maintaining state across stateless computing environments |
+| **9.5 Observability Stack for AI Systems** | Distributed tracing with LangSmith and Langfuse across cloud and self-hosted model calls; structured logging for all model inference; latency dashboards and cost monitoring; alerting on prompt regression and error rate spikes |
+| **9.6 Concurrent Agent Pool Management** | Horizontal scaling of agent workers; queue management for high-throughput workflows; load balancing across cloud model providers and self-hosted SLM inference endpoints |
+| **9.7 CI/CD for AI Systems** | Automated eval pipelines triggered on prompt or model changes; canary deployments for new model versions (proprietary and OSS releases); rollback automation on eval regression |
+| **9.8 Human-in-the-Loop (HITL) Gateways** | Injecting human approval checkpoints for high-stakes actions (DB writes, payments, outbound emails) without breaking agentic continuity; async approval queue design |
  
-**Key Outcome:** You'll deploy production AI infrastructure that is observable end-to-end, cost-controlled, resilient under load, and operationally safe for enterprise-grade workloads.
+**Key Outcome:** You'll deploy production AI infrastructure — cloud-hosted, self-hosted, or hybrid — that is observable end-to-end, cost-controlled, resilient under load, and operationally safe for enterprise-grade workloads.
  
 ---
  
 ## 🛠️ Tech Stack Covered
  
-This guide is framework-informed but not framework-locked.
+This guide is framework-informed but not framework-locked. The emphasis throughout is on model-agnostic patterns that work across proprietary APIs and self-hosted open-source models.
  
-**LLM Providers:** OpenAI, Anthropic (Claude), Google Gemini, open-source local models (Ollama, vLLM)
+**LLM Providers (Cloud):** OpenAI (GPT-4o, o1), Anthropic (Claude), Google (Gemini), Mistral AI, Groq, Together AI
+ 
+**Open-Source Model Families:** Meta Llama 3.x, Mistral/Mixtral, Microsoft Phi-3/Phi-4, Google Gemma 2, Alibaba Qwen, DeepSeek
+ 
+**Local Inference Runtimes:** Ollama, llama.cpp, vLLM, HuggingFace TGI (Text Generation Inference), HuggingFace Transformers
+ 
+**Model Abstraction:** LiteLLM (unified API across providers), OpenAI-compatible local endpoints
+ 
+**Quantization Formats:** GGUF, GPTQ, AWQ, ONNX
  
 **Orchestration:** LangGraph, LangChain, custom ReAct loops, Model Context Protocol (MCP)
  
+**Structured Output & Validation:** Pydantic, instructor, Outlines, LMQL, grammar-constrained decoding
+ 
 **Data & Vector Stores:** Qdrant, Supabase + pgvector, PostgreSQL
  
-**Evaluation:** RAGAS, custom LLM-as-a-Judge harnesses, CI/CD integration
+**Embeddings (Proprietary):** OpenAI Ada, Cohere Embed
  
-**Guardrails:** Llama Guard, NeMo Guardrails
+**Embeddings (OSS):** BGE, E5, Nomic Embed, Jina
+ 
+**Retrieval:** Cohere Reranker, BGE Reranker, BM25, RRF hybrid search
+ 
+**Evaluation:** RAGAS, custom LLM-as-a-Judge harnesses, cross-model eval pipelines
+ 
+**Guardrails:** Llama Guard, NeMo Guardrails, ShieldGemma
  
 **Observability:** LangSmith, Langfuse, Helicone
  
@@ -301,9 +334,32 @@ This guide is framework-informed but not framework-locked.
  
 **Frontend:** React, streaming JSON parsers, component-driven Generative UI
  
-**Embeddings & Retrieval:** Cohere Reranker, BGE models, BM25, RRF hybrid search
+---
+
+## 🗺️ How to Navigate This Guide
  
-**Schema & Validation:** Pydantic, instructor, native JSON mode
+```
+📁 ai-engineering-guide/
+├── 📄 README.md
+├── 📁 lesson-00-model-landscape/
+│   ├── 📄 notes.md
+│   └── 📁 examples/
+├── 📁 lesson-01-adlc/
+├── 📁 lesson-02-prompting-and-ui/
+├── 📁 lesson-03-custom-tools-and-mcp/
+├── 📁 lesson-04-data-layer/
+├── 📁 lesson-05-evals-and-security/
+├── 📁 lesson-06-agents/
+├── 📁 lesson-07-governance/
+├── 📁 lesson-08-enterprise-ai/
+└── 📁 lesson-09-infrastructure/
+```
+ 
+Each lesson folder contains:
+- **`notes.md`** — Conceptual explanations and architectural diagrams
+- **`examples/`** — Working code samples and reference implementations tested across model backends
+- **`exercises/`** — Hands-on challenges to reinforce the concepts
+> 💡 **Recommended Path:** Follow lessons sequentially on your first pass. Lessons 3, 4, and 6 have the most interdependencies and should not be taken out of order. Lesson 0 is required reading regardless of your prior experience — the model landscape section alone will reframe decisions you make in every lesson that follows.
  
 ---
  
@@ -311,13 +367,41 @@ This guide is framework-informed but not framework-locked.
  
 These ideas run through every lesson in the guide:
  
-1. **Evaluation First** — Never ship a prompt change without a test harness. LLMs are probabilistic; measure before you trust.
-2. **Separation of Concerns** — Keep your business logic, prompt logic, and model vendor entirely decoupled.
-3. **Governance by Design** — Compliance, fairness, and accountability are architectural decisions, not post-launch patches.
-4. **Complexity is a Cost** — Every agent hop, every tool call, and every retrieved chunk has a latency and dollar cost. Design with that in mind.
-5. **Defense in Depth** — Guardrails, HITL checkpoints, and adversarial testing are not optional layers.
-6. **Context is Architecture** — Memory design, chunking strategy, and retrieval quality determine 80% of RAG performance.
-7. **Agents Fail Loudly** — Design multi-agent systems with observable state, clear boundaries, and graceful failure modes.
+1. **Model Agnosticism by Default** — Never hard-code your architecture to a single provider or model family. Design for swap-ability from day one.
+2. **Evaluation First** — Never ship a prompt or model change without a test harness. Language models are probabilistic; measure before you trust.
+3. **Separation of Concerns** — Keep your business logic, prompt logic, and model backend entirely decoupled.
+4. **Governance by Design** — Compliance, fairness, and accountability are architectural decisions — not post-launch patches. This applies doubly when using OSS models without vendor safety layers.
+5. **Complexity is a Cost** — Every agent hop, tool call, and retrieved chunk has a latency and dollar cost. Design with that in mind from the start.
+6. **Defense in Depth** — Guardrails, HITL checkpoints, and adversarial testing are not optional layers. OSS models require you to own this entirely.
+7. **Context is Architecture** — Memory design, chunking strategy, and retrieval quality determine 80% of RAG performance.
+8. **Agents Fail Loudly** — Design multi-agent systems with observable state, clear boundaries, and graceful failure modes.
+
+---
+
+## 🗺️ How to Navigate This Guide
+ 
+```
+📁 ai-engineering-guide/
+├── 📄 README.md
+├── 📁 lesson-00-model-landscape/
+│   ├── 📄 notes.md
+│   └── 📁 examples/
+├── 📁 lesson-01-adlc/
+├── 📁 lesson-02-prompting-and-ui/
+├── 📁 lesson-03-custom-tools-and-mcp/
+├── 📁 lesson-04-data-layer/
+├── 📁 lesson-05-evals-and-security/
+├── 📁 lesson-06-agents/
+├── 📁 lesson-07-governance/
+├── 📁 lesson-08-enterprise-ai/
+└── 📁 lesson-09-infrastructure/
+```
+ 
+Each lesson folder contains:
+- **`notes.md`** — Conceptual explanations and architectural diagrams
+- **`examples/`** — Working code samples and reference implementations tested across model backends
+- **`exercises/`** — Hands-on challenges to reinforce the concepts
+> 💡 **Recommended Path:** Follow lessons sequentially on your first pass. Lessons 3, 4, and 6 have the most interdependencies and should not be taken out of order. Lesson 0 is required reading regardless of your prior experience — the model landscape section alone will reframe decisions you make in every lesson that follows.
 
 --- 
 
@@ -330,9 +414,3 @@ Contributions are welcome. If you want to add examples, fix explanations, or ext
 3. Commit your changes with clear messages
 4. Open a Pull Request with context on what you're adding and why
 Please review the [contribution guidelines](./CONTRIBUTING.md) before submitting.
- 
----
-
-📜 License
- 
-This guide is released under the [APACHE License](./LICENSE). You are free to use, adapt, and share it — attribution appreciated but not required.
